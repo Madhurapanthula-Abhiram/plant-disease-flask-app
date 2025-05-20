@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlantPulse - Plant Disease Identification</title>
+  <style>
+    /* Global Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f9f9f9;
+      color: #212121;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    /* Header Styles */
+    header {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 50;
+      transition: all 0.3s;
+    }
+    
+    header.scrolled {
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      width: 100%;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 24px;
+      font-weight: 700;
+      color: #4CAF50;
+      transition: transform 0.3s;
+    }
+    
+    .logo:hover {
+      transform: scale(1.05);
+    }
+    
+    .nav-links {
+      display: none;
+      margin: 0 auto;
+    }
+    
+    @media (min-width: 768px) {
+      .nav-links {
+        display: flex;
+        gap: 32px;
+      }
+      
+      .nav-links a {
+        position: relative;
+        color: #333;
+        font-weight: 500;
+        transition: color 0.3s;
+      }
+      
+      .nav-links a:hover {
+        color: #4CAF50;
+      }
+      
+      .nav-links a::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        background-color: #4CAF50;
+        bottom: -5px;
+        left: 0;
+        transition: all 0.3s;
+      }
+      
+      .nav-links a:hover::after {
+        width: 100%;
+      }
+    }
+    
+    .auth-profile {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .auth-buttons {
+      display: none;
+    }
+    
+    @media (min-width: 640px) {
+      .auth-buttons {
+        display: flex;
+        gap: 12px;
+      }
+    }
+    
+    .profile-dropdown {
+      position: relative;
+    }
+    
+    .profile-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #E8F5E9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2E7D32;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.3s;
+      overflow: hidden;
+    }
+    
+    .profile-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .profile-icon:hover {
+      transform: scale(1.1);
+    }
+    
+    .dropdown-menu {
+      position: absolute;
+      top: 48px;
+      right: 0;
+      width: 200px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 8px 0;
+      transition: all 0.3s;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      z-index: 50;
+    }
+    
+    .dropdown-menu.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    
+    .dropdown-menu a {
+      display: block;
+      padding: 8px 16px;
+      color: #333;
+      transition: background-color 0.2s;
+    }
+    
+    .dropdown-menu a:hover {
+      background-color: #E8F5E9;
+    }
+    
+    /* Button Styles */
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    
+    .btn-outline {
+      border: 1px solid #4CAF50;
+      color: #4CAF50;
+    }
+    
+    .btn-outline:hover {
+      background-color: #E8F5E9;
+    }
+    
+    .btn-primary {
+      background-color: #4CAF50;
+      color: white;
+      border: 1px solid #4CAF50;
+    }
+    
+    .btn-primary:hover {
+      background-color: #388E3C;
+    }
+    
+    /* Hero Section */
+    .hero {
+      padding-top: 112px;
+      padding-bottom: 64px;
+      background: linear-gradient(to bottom right, #C8E6C9 0%, #FFFFFF 100%);
+      border-radius: 0 0 0 40%;
+    }
+    
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+    
+    @media (min-width: 768px) {
+      .hero-content {
+        flex-direction: row;
+      }
+    }
+    
+    .hero-text {
+      flex: 1;
+      text-align: center;
+    }
+    
+    @media (min-width: 768px) {
+      .hero-text {
+        text-align: left;
+      }
+    }
+    
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #212121;
+      animation: fadeInUp 1s ease;
+    }
+    
+    @media (min-width: 768px) {
+      .hero-title {
+        font-size: 3rem;
+      }
+    }
+    
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: #616161;
+      margin-bottom: 32px;
+      animation: fadeInUp 1s ease 0.2s;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+    
+    .hero-cta {
+      animation: fadeInUp 1s ease 0.4s;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+    
+    .hero-cta .btn {
+      padding: 12px 32px;
+      font-size: 1.125rem;
+    }
+    
+    .hero-image {
+      flex: 1;
+      text-align: center;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .hero-image img {
+      max-width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Features Section */
+    .features {
+      padding: 80px 0;
+    }
+    
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-align: center;
+      color: #212121;
+      position: relative;
+      padding-bottom: 16px;
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      width: 80px;
+      height: 4px;
+      background-color: #4CAF50;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .section-subtitle {
+      text-align: center;
+      color: #616161;
+      max-width: 600px;
+      margin: 0 auto 64px;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    
+    @media (min-width: 768px) {
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .features-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    .feature-card {
+      background-color: white;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .feature-icon {
+      font-size: 3rem;
+      color: #4CAF50;
+      margin-bottom: 24px;
+    }
+    
+    .feature-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #212121;
+    }
+    
+    .feature-description {
+      color: #616161;
+      line-height: 1.6;
+    }
+    
+    /* Diseases Section */
+    .diseases {
+      padding: 80px 0;
+      background-color: #E8F5E9;
+    }
+    
+    .disease-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    
+    @media (min-width: 640px) {
+      .disease-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .disease-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    .disease-card {
+      background-color: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      position: relative;
+      transition: all 0.3s;
+    }
+    
+    .disease-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .disease-image {
+      height: 192px;
+      overflow: hidden;
+    }
+    
+    .disease-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s;
+    }
+    
+    .disease-card:hover .disease-image img {
+      transform: scale(1.1);
+    }
+    
+    .disease-content {
+      padding: 20px;
+    }
+    
+    .disease-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #212121;
+    }
+    
+    .disease-description {
+      color: #616161;
+      font-size: 0.875rem;
+      margin-bottom: 16px;
+    }
+    
+    .disease-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      color: #757575;
+    }
+    
+    /* How It Works Section */
+    .how-it-works {
+      padding: 80px 0;
+    }
+    
+    .steps {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    
+    @media (min-width: 768px) {
+      .steps {
+        flex-direction: row;
+      }
+      
+      .steps::after {
+        content: '';
+        position: absolute;
+        top: 40px;
+        left: 40px;
+        right: 40px;
+        height: 2px;
+        background-color: #E8F5E9;
+        z-index: -1;
+      }
+    }
+    
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 40px;
+      transition: all 0.5s;
+    }
+    
+    @media (min-width: 768px) {
+      .step {
+        flex: 1;
+        margin-bottom: 0;
+      }
+    }
+    
+    .step.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .step:not(.visible) {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    .step-number {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: #4CAF50;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .step-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #212121;
+    }
+    
+    .step-description {
+      color: #616161;
+      font-size: 0.875rem;
+      max-width: 250px;
+    }
+    
+    /* CTA Section */
+    .cta {
+      padding: 80px 0;
+      background: linear-gradient(to right, #4CAF50, #66BB6A);
+      color: white;
+    }
+    
+    .cta-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .cta-subtitle {
+      font-size: 1.25rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto 32px;
+      text-align: center;
+    }
+    
+    .cta-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    @media (min-width: 640px) {
+      .cta-buttons {
+        flex-direction: row;
+      }
+    }
+    
+    .cta .btn {
+      padding: 12px 32px;
+    }
+    
+    .btn-white {
+      background-color: white;
+      color: #4CAF50;
+      border: 1px solid white;
+    }
+    
+    .btn-white:hover {
+      background-color: transparent;
+      color: white;
+    }
+    
+    .btn-outline-white {
+      border: 1px solid white;
+      color: white;
+    }
+    
+    .btn-outline-white:hover {
+      background-color: white;
+      color: #4CAF50;
+    }
+    
+    /* Footer */
+    .footer {
+      background-color: #212121;
+      color: white;
+      padding: 64px 0 24px;
+    }
+    
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    
+    @media (min-width: 768px) {
+      .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .footer-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    
+    .footer-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      position: relative;
+    }
+    
+    .footer-title::after {
+      content: '';
+      position: absolute;
+      word-spacing: 1PX;
+      width: 40px;
+      height: 2px;
+      background-color: #4CAF50;
+      bottom: 0;
+      left: 0;
+    }
+    
+    .footer-text {
+      color: #BDBDBD;
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+    
+    .social-links {
+      display: flex;
+      gap: 16px;
+    }
+    
+    .social-link {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: all 0.3s;
+    }
+    
+    .social-link:hover {
+      background-color: #4CAF50;
+      transform: translateY(-4px);
+    }
+    
+    .footer-links {
+      list-style: none;
+    }
+    
+    .footer-links li {
+      margin-bottom: 12px;
+    }
+    
+    .footer-links a {
+      color: #BDBDBD;
+      transition: color 0.3s;
+    }
+    
+    .footer-links a:hover {
+      color: #4CAF50;
+    }
+    
+    .footer-bottom {
+      text-align: center;
+      padding-top: 32px;
+      border-top: 1px solid #333;
+      color: #757575;
+      font-size: 0.875rem;
+    }
+    
+    /* Animation Keyframes */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header id="header">
+    <div class="container">
+      <nav>
+        <a href="#" class="logo">
+          <span>🌿</span> PlantPulse
+        </a>
+        
+        <div class="nav-links">
+          <a href="{{ url_for('plant') }}" class="home-link">Home</a>
+          <a href="{{ url_for('about') }}">About</a>
+          <a href="{{ url_for('disease') }}">Diseases</a>
+          <a href="{{ url_for('how_it_works') }}">How It Works</a>
+        </div>
+        
+        <div class="auth-profile">
+          <div class="auth-buttons">
+            <a href="{{ url_for('login')}}" class="btn btn-outline">Login</a>
+            <a href="{{ url_for('signup')}}" class="btn btn-primary">Sign Up</a>
+          </div>
+          
+          <div class="profile-dropdown">
+            <div class="profile-icon" onclick="toggleProfileDropdown()">
+              {% if user.profile_picture %}
+                <img src="{{ url_for('uploaded_file', filename=user.profile_picture) }}" alt="{{ user.fullname }}">
+              {% else %}
+                P
+              {% endif %}
+            </div>
+            <div class="dropdown-menu" id="profileDropdown">
+              <a href="{{ url_for('profile')}}">My Profile</a>
+              <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 class="hero-title">Identify Plant Diseases Instantly</h1>
+          <p class="hero-subtitle">Use our Hybrid Model to detect and treat plant diseases early. Simply upload a photo of your plant and get instant diagnosis and treatment recommendations.</p>
+          <div class="hero-cta">
+            <section id="Get started" class="start">
+          <a href="{{ url_for('upload')}}" class="btn btn-primary">Get Started</a>
+
+          </div>
+        </div>
+        <div class="hero-image">
+          <img src="{{ url_for('static', filename='images/leaf2.png') }}" alt="Plant disease detection">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">Our Features</h2>
+      <p class="section-subtitle">Powerful tools to help you keep your plants healthy and thriving</p>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">📸</div>
+          <h3 class="feature-title">Instant Detection</h3>
+          <p class="feature-description">Just take a photo of your plant and our model will identify the disease within seconds with high accuracy.</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">💊</div>
+          <h3 class="feature-title">Treatment Plans</h3>
+          <p class="feature-description">Get different personalized treatment recommendations based on the identified diseases navigate to our  diseases page .</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🌱</div>
+          <h3 class="feature-title">Know your Plant Disease Symptoms</h3>
+          <p class="feature-description">Learn best practices for maintaining plant health and preventing future diseases.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Diseases Section -->
+  <section class="diseases">
+    <div class="container">
+      <h2 class="section-title">Common Plant Diseases</h2>
+      <p class="section-subtitle">Learn about common plant diseases, their symptoms, and treatment options</p>
+      
+      <div class="disease-grid">
+        <div class="disease-card">
+          <div class="disease-image">
+            <img src="{{ url_for('static', filename='images/powder.jpg') }}" alt="Powdery Mildew">
+          </div>
+          <div class="disease-content">
+            <h3 class="disease-title">Powdery Mildew</h3>
+            <p class="disease-description">A fungal disease that appears as white powdery spots on leaves and stems.</p>
+            <div class="disease-meta">
+              <span>Severity: Medium</span>
+              <span>Plants: 150+</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="disease-card">
+          <div class="disease-image">
+            <img src="{{ url_for('static', filename='images/blspots.jpg') }}" alt="Black Spot">
+          </div>
+          <div class="disease-content">
+            <h3 class="disease-title">Black Spot</h3>
+            <p class="disease-description">A common fungal disease that causes black spots with yellow halos on leaves.</p>
+            <div class="disease-meta">
+              <span>Severity: Medium</span>
+              <span>Plants: 50+</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="disease-card">
+          <div class="disease-image">
+            <img src="{{ url_for('static', filename='images/latebli.jpg') }}" alt="Leaf Blight">
+          </div>
+          <div class="disease-content">
+            <h3 class="disease-title">Leaf Blight</h3>
+            <p class="disease-description">A bacterial or fungal disease causing rapid browning and death of plant tissues.</p>
+            <div class="disease-meta">
+              <span>Severity: High</span>
+              <span>Plants: 200+</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="disease-card">
+          <div class="disease-image">
+            <img src="{{ url_for('static', filename='images/root rot.jpeg') }}" alt="Root Rot">
+          </div>
+          <div class="disease-content">
+            <h3 class="disease-title">Root Rot</h3>
+            <p class="disease-description">A fungal disease that attacks the roots in wet, poorly drained soils.</p>
+            <div class="disease-meta">
+              <span>Severity: High</span>
+              <span>Plants: 300+</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="disease-card">
+          <div class="disease-image">
+            <img src="{{ url_for('static', filename='images/corn.jpg') }}" alt="Corn Leaf Blight">
+          </div>
+          <div class="disease-content">
+            <h3 class="disease-title">Corn Leaf Blight</h3>
+            <p class="disease-description">A fungal disease that causes long, brown lesions on corn leaves and can reduce yield.</p>
+            <div class="disease-meta">
+              <span>Severity: High</span>
+              <span>Plants: Corn</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="disease-card">
+          <div class="disease-image">
+            <img src="{{ url_for('static', filename='images/Cherry-leaf-spot-onleaf.jpg') }}" alt="Cherry Leaf Spot">
+          </div>
+          <div class="disease-content">
+            <h3 class="disease-title">Cherry Leaf Spot</h3>
+            <p class="disease-description">A fungal disease creating purple-brown spots on cherry leaves causing premature defoliation.</p>
+            <div class="disease-meta">
+              <span>Severity: Medium</span>
+              <span>Plants: Cherry Trees</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="how-it-works">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-subtitle">Our simple 3-step process to identify and treat plant diseases</p>
+      
+      <div class="steps" id="steps">
+        <div class="step" id="step1">
+          <div class="step-number">1</div>
+          <h3 class="step-title">Take a Photo</h3>
+          <p class="step-description">Capture clear images of the affected plant parts showing disease symptoms.</p>
+        </div>
+        
+        <div class="step" id="step2">
+          <div class="step-number">2</div>
+          <h3 class="step-title">Upload & Analyze</h3>
+          <p class="step-description">Upload the image to our platform and let our AI analyze the symptoms.</p>
+        </div>
+        
+        <div class="step" id="step3">
+          <div class="step-number">3</div>
+          <h3 class="step-title">Get Diagnosis</h3>
+          <p class="step-description">Receive accurate diagnosis with detailed information and treatment options.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta">
+    <div class="container">
+      <h2 class="cta-title">Ready to Diagnose Your Plants?</h2>
+      <p class="cta-subtitle">Get Started and become a new member of our PlantPulse to keep your plants healthy and disease-free.</p>
+      <div class="cta-buttons">
+        <a href="{{ url_for('plant')}}" class="btn btn-white">Try it Now</a>
+        <a href="{{ url_for('signup')}}" class="btn btn-outline-white">Create Account</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h3 class="footer-title">About PlantPulse</h3>
+          <p class="footer-text">We use advanced AI technology to help plant lovers identify and treat plant diseases quickly and effectively.</p>
+          <div class="social-links">
+            <a href="#" class="social-link">📱</a>
+            <a href="#" class="social-link">💻</a>
+            <a href="#" class="social-link">📧</a>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="footer-title">Quick Links</h3>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('plant') }}">Home</a></li>
+            <li><a href="{{ url_for('about') }}">About Us</a></li>
+            <li><a href="{{ url_for('disease') }}">Plant Diseases</a></li>
+            <li><a href="{{ url_for('how_it_works') }}">How to Use</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="footer-title">Our Team</h3>
+          <ul class="footer-links">
+            <li><a href="#">M.Abhiram</a></li>
+            <li><a href="#">M.Raghu Ram</a></li>
+            <li><a href="#">G.Chakravarthi</a></li>
+            <li><a href="#">A.Jaleel</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="footer-title">Roll Numbers</h3>
+          <p class="footer-text">21X41A4230</p>
+          <p class="footer-text">21X41A4233</p>
+          <p class="footer-text">21X41A4218</p>
+          <p class="footer-text">21X41A4201</p>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; <script>document.write(new Date().getFullYear())</script> PlantPulse. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Toggle profile dropdown
+    function toggleProfileDropdown() {
+      const dropdown = document.getElementById('profileDropdown');
+      dropdown.classList.toggle('active');
+    }
+    
+    // Step animations on scroll
+    document.addEventListener('DOMContentLoaded', function() {
+      const steps = document.getElementById('steps');
+      const step1 = document.getElementById('step1');
+      const step2 = document.getElementById('step2');
+      const step3 = document.getElementById('step3');
+      
+      function handleScroll() {
+        const stepsPosition = steps.getBoundingClientRect().top;
+        const screenPosition = window.innerHeight / 1.3;
+        
+        if (stepsPosition < screenPosition) {
+          setTimeout(() => {
+            step1.classList.add('visible');
+          }, 0);
+          
+          setTimeout(() => {
+            step2.classList.add('visible');
+          }, 200);
+          
+          setTimeout(() => {
+            step3.classList.add('visible');
+          }, 400);
+        }
+      }
+      
+      window.addEventListener('scroll', handleScroll);
+      handleScroll(); // Check initial position
+      
+      // Header scroll effect
+      const header = document.getElementById('header');
+      
+      function handleHeaderScroll() {
+        if (window.scrollY > 50) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      }
+      
+      window.addEventListener('scroll', handleHeaderScroll);
+    });
+  </script>
+</body>
+</html>

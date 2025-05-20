@@ -1,0 +1,2259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Disease Library - PlantPulse</title>
+    <style>
+        /* Reset styles */
+        * {
+            margin: 0;
+           
+            padding: 0px;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            
+        }
+        
+        /* Header */
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        nav {
+      display: flex;
+      justify-content: space-between;
+      text-decoration: none;
+      align-items: center;
+      padding: 15px 0;
+      width: 100%;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      gap: 8px;
+      font-size: 24px;
+      font-weight: 700;
+      color: #4CAF50;
+      transition: transform 0.3s;
+    }
+    
+    .logo:hover {
+      transform: scale(1.05);
+    }
+    
+    .nav-links {
+      display: none;
+      margin: 0 auto;
+    }
+    
+    @media (min-width: 768px) {
+      .nav-links {
+        display: flex;
+        gap: 32px;
+      }
+      
+      .nav-links a {
+        position: relative;
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+        transition: color 0.3s;
+      }
+      
+      .nav-links a:hover {
+        color: #4CAF50;
+      }
+      
+      .nav-links a::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        background-color: #4CAF50;
+        bottom: -5px;
+        left: 0;
+        transition: all 0.3s;
+      }
+      
+      .nav-links a:hover::after {
+        width: 100%;
+      }
+    }
+        
+        /* Breadcrumbs */
+        .breadcrumbs {
+            padding: 15px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .breadcrumb-link {
+            color: #22c55e;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-link:hover {
+            text-decoration: underline;
+        }
+        
+        .breadcrumb-separator {
+            margin: 0 8px;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background-color: #22c55e;
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-top: 64px;
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            animation: fadeIn 1s ease-in-out;
+        }
+        
+        .hero p {
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            animation: slideIn 1s ease-in-out;
+            opacity: 0;
+            animation-fill-mode: forwards;
+            animation-delay: 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Search and Filter Section */
+        .search-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin: 30px 0;
+        }
+        
+        .search-box {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .search-input:focus {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+        }
+        
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 10;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .search-dropdown.show {
+            display: block;
+        }
+        
+        .search-result {
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .search-result:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .result-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        .result-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .result-info h4 {
+            font-size: 0.9rem;
+            margin: 0;
+            color: #333;
+        }
+        
+        .result-info p {
+            font-size: 0.75rem;
+            color: #666;
+            margin: 0;
+        }
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .filter-dropdown {
+            position: relative;
+        }
+        
+        .filter-button {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 10px 15px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 14px;
+            text-align: left;
+        }
+        
+        .filter-button:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .filter-button .badge {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: inline-block;
+        }
+        
+        .badge.fungal {
+            background-color: #ef4444;
+        }
+        
+        .badge.bacterial {
+            background-color: #3b82f6;
+        }
+        
+        .badge.viral {
+            background-color: #f59e0b;
+        }
+        
+        .badge.pest {
+            background-color: #8b5cf6;
+        }
+        
+        .dropdown-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 10;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .dropdown-content.show {
+            display: block;
+        }
+        
+        .dropdown-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 14px;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        /* Disease Category Sections */
+        .category-section {
+            margin-bottom: 50px;
+        }
+        
+        .category-heading {
+            font-size: 1.75rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #22c55e;
+            color: #333;
+        }
+        
+        .disease-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            
+            gap: 20px;
+        }
+        
+        .disease-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .disease-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .disease-image {
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .disease-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .disease-card:hover .disease-image img {
+            transform: scale(1.1);
+        }
+        
+        .disease-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .disease-badge.fungal {
+            background-color: #ef4444;
+        }
+        
+        .disease-badge.bacterial {
+            background-color: #3b82f6;
+        }
+        
+        .disease-badge.viral {
+            background-color: #f59e0b;
+        }
+        
+        .disease-badge.pest {
+            background-color: #8b5cf6;
+        }
+        
+        .disease-content {
+            padding: 20px;
+        }
+        
+        .disease-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .disease-title i {
+            color: #ccc;
+            transition: transform 0.3s;
+        }
+        
+        .disease-card:hover .disease-title i {
+            transform: translateX(5px);
+            color: #22c55e;
+        }
+        
+        .disease-info {
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        
+        .disease-info-label {
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .disease-info-value {
+            color: #666;
+        }
+        
+        .disease-description {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(3px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-container {
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: scaleIn 0.3s ease;
+        }
+        
+        @keyframes scaleIn {
+            from { 
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to { 
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .modal-header {
+            position: relative;
+            height: 250px;
+        }
+        
+        .modal-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .modal-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+        }
+        
+        .modal-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .modal-badge.fungal {
+            background-color: #ef4444;
+        }
+        
+        .modal-badge.bacterial {
+            background-color: #3b82f6;
+        }
+        
+        .modal-badge.viral {
+            background-color: #f59e0b;
+        }
+        
+        .modal-badge.pest {
+            background-color: #8b5cf6;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .modal-close:hover {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+        
+        .modal-indicators {
+            position: absolute;
+            bottom: 50px;
+            left: 25px;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .severity-dot {
+            background-color: #ef4444;
+        }
+        
+        .plants-dot {
+            background-color: #22c55e;
+        }
+        
+        .modal-title {
+            position: absolute;
+            bottom: 20px;
+            left: 25px;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .modal-content {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+        }
+        
+        .modal-section {
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .modal-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .modal-section-content {
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .symptom-list {
+            list-style: none;
+        }
+        
+        .symptom-item {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .symptom-indicator {
+            width: 8px;
+            height: 8px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            margin-top: 8px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        .treatment-accordion {
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .treatment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .treatment-header:hover {
+            background-color: #f0f1f2;
+        }
+        
+        .treatment-title {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .treatment-icon svg {
+            transition: transform 0.3s;
+        }
+        
+        .treatment-accordion.active .treatment-icon svg {
+            transform: rotate(180deg);
+        }
+        
+        .treatment-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .treatment-accordion.active .treatment-content {
+            max-height: 500px; /* arbitrary large value */
+        }
+        
+        .treatment-steps {
+            padding: 15px;
+            counter-reset: step;
+        }
+        
+        .treatment-step {
+            display: flex;
+            margin-bottom: 12px;
+        }
+        
+        .treatment-step:last-child {
+            margin-bottom: 0;
+        }
+        
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #222;
+            color: white;
+            padding: 50px 0 20px;
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-column h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            position: relative;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background-color: #22c55e;
+        }
+        
+        .footer-column p {
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background-color: #333;
+            border-radius: 50%;
+            color: white;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+        
+        .social-link:hover {
+            background-color: #22c55e;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-link {
+            margin-bottom: 10px;
+        }
+        
+        .footer-link a {
+            color: #aaa;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-link a:hover {
+            color: #22c55e;
+        }
+        
+        .team-member {
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .disease-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .modal-header {
+                height: 200px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .disease-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-container {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header id="header">
+        <div class="container">
+          <nav>
+            <a href="#" class="logo">
+              <span>🌿</span> PlantPulse
+            </a>
+            
+            <div class="nav-links">
+              <a href="{{ url_for('plant') }}" class="home-link">Home</a>
+              <a href="{{ url_for('about') }}">About</a>
+              <a href="{{ url_for('disease') }}">Diseases</a>
+              <a href="{{ url_for('how_it_works') }}">How It Works</a>
+            </div>
+            </nav>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <div class="container">
+            <h1>Plant Disease Library</h1>
+            <p>Comprehensive information about plant diseases, their symptoms, and treatment options to keep your plants healthy and thriving.</p>
+        </div>
+    </section>
+    
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="#" class="breadcrumb-link">Home</a>
+            <span class="breadcrumb-separator">›</span>
+            <span>Diseases</span>
+        </div>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <div class="search-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <input type="text" id="search-input" class="search-input" placeholder="Search for plant diseases...">
+                <div id="search-dropdown" class="search-dropdown"></div>
+            </div>
+            
+            <div class="filter-grid">
+                <div class="filter-dropdown">
+                    <button class="filter-button" onclick="toggleDropdown('fungal-dropdown')">
+                        <div>
+                            <span class="badge fungal"></span>
+                            Fungal Diseases
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div id="fungal-dropdown" class="dropdown-content">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="filter-dropdown">
+                    <button class="filter-button" onclick="toggleDropdown('bacterial-dropdown')">
+                        <div>
+                            <span class="badge bacterial"></span>
+                            Bacterial Diseases
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div id="bacterial-dropdown" class="dropdown-content">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="filter-dropdown">
+                    <button class="filter-button" onclick="toggleDropdown('viral-dropdown')">
+                        <div>
+                            <span class="badge viral"></span>
+                            Viral Diseases
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div id="viral-dropdown" class="dropdown-content">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="filter-dropdown">
+                    <button class="filter-button" onclick="toggleDropdown('pest-dropdown')">
+                        <div>
+                            <span class="badge pest"></span>
+                            Pests & Insects
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    <div id="pest-dropdown" class="dropdown-content">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="disease-categories">
+            <!-- Will be populated by JavaScript using the format shown in the screenshot -->
+            <!-- e.g.:
+            <h2 class="category-heading">Apple Trees</h2>
+            <div class="disease-grid">
+                <div class="disease-card" onclick="openModal('apple-scab')">
+                    <div class="disease-image">
+                        <img src="https://plantpathology.ca.uky.edu/files/ppfs-fr-t-8.jpg" alt="Apple Scab">
+                        <div class="disease-badge fungal">Fungal Disease</div>
+                    </div>
+                    <div class="disease-content">
+                        <h3 class="disease-title">
+                            <span>Apple Scab</span>
+                            <i>→</i>
+                        </h3>
+                        <div class="disease-info">
+                            <span class="disease-info-label">Affects:</span>
+                            <span class="disease-info-value">Apple trees</span>
+                        </div>
+                        <p class="disease-description">A common fungal disease causing dark, scabby lesions on apple leaves...</p>
+                    </div>
+                </div>
+            </div>
+            -->
+        </div>
+    </div>
+    
+    <div id="disease-modal" class="modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <img id="modal-image" class="modal-cover" src="" alt="">
+                <div class="modal-overlay"></div>
+                <div id="modal-badge" class="modal-badge"></div>
+                <button class="modal-close" onclick="closeModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                <div class="modal-indicators">
+                    <div class="indicator">
+                        <div class="indicator-dot severity-dot"></div>
+                        <span id="modal-severity"></span>
+                    </div>
+                    <div class="indicator">
+                        <div class="indicator-dot plants-dot"></div>
+                        <span id="modal-plants"></span>
+                    </div>
+                </div>
+                <h2 id="modal-title" class="modal-title"></h2>
+            </div>
+            <div id="modal-body" class="modal-content">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h3>About PlantPulse</h3>
+                    <p>We use advanced AI technology to help plant lovers identify and treat plant diseases quickly and effectively.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li class="footer-link"><a href="{{ url_for('plant') }}">Home</a></li>
+                        <li class="footer-link"><a href="{{ url_for('about') }}">About Us</a></li>
+                        <li class="footer-link"><a href="{{ url_for('disease') }}">Plant Diseases</a></li>
+                        <li class="footer-link"><a href="{{ url_for('how_it_works') }}">How to Use</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Our Team</h3>
+                    <ul class="footer-links">
+                        <li class="footer-link"><a href="#">M.Abhiram</a></li>
+                        <li class="footer-link"><a href="#">M.Raghu Ram</a></li>
+                        <li class="footer-link"><a href="#">G.Chakravarthi</a></li>
+                        <li class="footer-link"><a href="#">A.Jaleel</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Roll Numbers</h3>
+                    <p class="team-member">21X41A4230</p>
+                    <p class="team-member">21X41A4233</p>
+                    <p class="team-member">21X41A4218</p>
+                    <p class="team-member">21X41A4201</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; <span id="current-year"></span> PlantPulse. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Set current year in footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        // Toggle filter dropdown
+        function toggleDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            
+            // Close any open dropdowns first
+            const dropdowns = document.getElementsByClassName('dropdown-content');
+            for (let i = 0; i < dropdowns.length; i++) {
+                const openDropdown = dropdowns[i];
+                if (openDropdown.id !== dropdownId && openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+            
+            // Toggle the current dropdown
+            dropdown.classList.toggle('show');
+        }
+        
+        // Toggle treatment accordion
+        function toggleTreatment(element) {
+            const accordion = element.closest('.treatment-accordion');
+            accordion.classList.toggle('active');
+        }
+        
+        // Close dropdown when clicking outside
+        window.onclick = function(event) {
+            if (!event.target.closest('.filter-dropdown')) {
+                const dropdowns = document.getElementsByClassName('dropdown-content');
+                for (let i = 0; i < dropdowns.length; i++) {
+                    const openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+            
+            if (!event.target.closest('.search-box')) {
+                const searchDropdown = document.getElementById('search-dropdown');
+                searchDropdown.classList.remove('show');
+            }
+            
+            if (event.target.classList.contains('modal')) {
+                closeModal();
+            }
+        }
+        
+        // Disease data
+        const diseaseData = {
+            'apple-scab': {
+                id: 'apple-scab',
+                name: 'Apple Scab',
+                image: "{{ url_for('static', filename='images/apple_scab.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Medium',
+                plants: 'Apple trees',
+                description: 'Apple scab is caused by the fungus Venturia inaequalis and is one of the most serious diseases of apple trees. The fungus overwinters in fallen leaves and produces spores in spring. Rain and high humidity promote infection. Severe infections can significantly reduce fruit quality and yield.',
+                symptoms: [
+                    'Olive-green to brown scabby lesions on fruit',
+                    'Dark, velvety spots on leaves that become darker and more raised',
+                    'Severe leaf drop in heavily infected trees',
+                    'Deformed or cracked fruit'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Plant resistant apple varieties',
+                        'Rake and destroy fallen leaves in autumn',
+                        'Prune trees to improve air circulation',
+                        'Avoid overhead irrigation'
+                    ],
+                    'Organic Treatment': [
+                        'Apply sulfur sprays at green tip stage and during growing season',
+                        'Use neem oil or potassium bicarbonate sprays',
+                        'Apply compost tea to boost tree immunity',
+                        'Remove any infected fruit and dispose of properly'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides containing myclobutanil or captan',
+                        'Begin applications at green tip stage and continue as needed',
+                        'Follow a regular spray schedule during wet periods',
+                        'Rotate between fungicide classes to prevent resistance'
+                    ]
+                }
+            },
+            'apple-black-rot': {
+                id: 'apple-black-rot',
+                name: 'Apple Black Rot',
+                image: "{{ url_for('static', filename='images/appleblackrot.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'High',
+                plants: 'Apple trees',
+                description: 'Apple black rot is caused by the fungus Botryosphaeria obtusa and affects all parts of the apple tree. The fungus can enter through wounds, pruning cuts, or winter injury. Black rot can cause significant damage to both the current season\'s crop and the long-term health of the tree through cankers that can girdle branches.',
+                symptoms: [
+                    'Dark brown to black circular lesions on fruit',
+                    'Rotting fruit with concentric rings of spore-producing structures',
+                    'Reddish-brown sunken cankers on branches and twigs',
+                    'Leaf spots with purple margins and brown centers'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Prune out dead or diseased wood during dormant season',
+                        'Disinfect pruning tools between cuts',
+                        'Remove mummified fruit from trees and ground',
+                        'Maintain tree vigor through proper fertilization and watering'
+                    ],
+                    'Organic Treatment': [
+                        'Apply copper-based fungicides during dormant season',
+                        'Use compost tea to boost tree immune response',
+                        'Apply neem oil or potassium bicarbonate sprays during growing season',
+                        'Seal large pruning cuts with tree wound dressing'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides containing thiophanate-methyl or captan',
+                        'Treat during dormant season and continue through growing season',
+                        'Focus sprays after rain events or periods of high humidity',
+                        'Rotate fungicide classes to prevent resistance'
+                    ]
+                }
+            },
+            'cedar-apple-rust': {
+                id: 'cedar-apple-rust',
+                name: 'Cedar Apple Rust',
+                image: "{{ url_for('static', filename='images/sedarapplerrust.jpeg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Medium',
+                plants: 'Apple trees, Cedar/Juniper trees',
+                description: 'Cedar apple rust is caused by Gymnosporangium juniperi-virginianae, a fungus that requires two hosts to complete its life cycle. The disease alternates between apple trees and cedar/juniper trees. In spring, spores from cedar galls infect apple trees, and later in the season, spores from apple leaves infect cedar trees.',
+                symptoms: [
+                    'Bright orange-yellow spots on apple leaves',
+                    'Deformed fruit with yellow lesions',
+                    'Orange gelatinous tendrils on cedar/juniper galls in spring',
+                    'Brown, woody galls on cedar/juniper branches'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Plant resistant apple varieties',
+                        'Remove cedar/juniper trees within 1/2 mile if possible',
+                        'Improve air circulation through proper pruning',
+                        'Remove and destroy infected leaves and fruit'
+                    ],
+                    'Organic Treatment': [
+                        'Apply sulfur sprays at 7-10 day intervals from pink bud stage',
+                        'Use neem oil or potassium bicarbonate sprays',
+                        'Apply compost tea to boost tree immunity',
+                        'Remove cedar galls within reach on nearby cedar trees'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides containing myclobutanil or propiconazole',
+                        'Begin applications at pink bud stage of apple trees',
+                        'Continue applications at 7-14 day intervals through spring',
+                        'Focus protection during spring when cedar galls are active'
+                    ]
+                }
+            },
+            'cherry-leaf-spot': {
+                id: 'cherry-leaf-spot',
+                name: 'Cherry Leaf Spot',
+                image: "{{ url_for('static', filename='images/Cherry-leaf-spot-onleaf.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Medium',
+                plants: 'Cherry Trees',
+                description: 'Cherry leaf spot is caused by the fungus Blumeriella jaapii (formerly Coccomyces hiemalis). The disease affects sweet, sour, and ornamental cherries. Infections begin in spring during wet periods when spores are released from fallen leaves. Severe infections can cause defoliation by midsummer, weakening trees and reducing fruit quality and yield.',
+                symptoms: [
+                    'Small purple spots that enlarge and turn brown',
+                    'Spots that may drop out leaving \'shot-hole\' appearance',
+                    'Yellow leaves that fall prematurely',
+                    'Reduced tree vigor and fruit production'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Rake and destroy fallen leaves in autumn',
+                        'Prune trees to improve air circulation',
+                        'Avoid overhead irrigation',
+                        'Maintain tree vigor with proper fertilization'
+                    ],
+                    'Organic Treatment': [
+                        'Apply liquid lime sulfur before bud break',
+                        'Use copper-based fungicides following bud break',
+                        'Apply compost tea to boost tree immunity',
+                        'Ensure good weed control around trees'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides containing chlorothalonil, captan, or myclobutanil',
+                        'Begin spraying at petal fall and continue at 7-14 day intervals',
+                        'Increase spray frequency during wet periods',
+                        'Ensure thorough coverage of leaves'
+                    ]
+                }
+            },
+            'corn-common-rust': {
+                id: 'corn-common-rust',
+                name: 'Corn Common Rust',
+                image: "{{ url_for('static', filename='images/Corncommonrust.png') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Medium',
+                plants: 'Corn',
+                description: 'Common rust in corn is caused by the fungus Puccinia sorghi. It produces reddish-brown pustules on both sides of the leaves and thrives in cool, humid conditions. Severe infections can lead to reduced photosynthesis and lower yields.',
+                symptoms: [
+                    'Reddish-brown pustules on leaves',
+                    'Leaf yellowing and wilting',
+                    'Reduced photosynthesis and growth',
+                    'Severe infections lead to premature death'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Plant rust-resistant corn varieties',
+                        'Rotate crops to reduce fungal spores',
+                        'Maintain proper plant spacing for airflow',
+                        'Monitor fields regularly during wet seasons'
+                    ],
+                    'Organic Treatment': [
+                        'Use copper-based fungicides',
+                        'Apply neem oil to affected leaves',
+                        'Increase soil health with compost applications'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides containing azoxystrobin or propiconazole',
+                        'Begin treatments at the first sign of rust',
+                        'Reapply every 7-14 days during humid conditions'
+                    ]
+                }
+            },
+            'corn-northern-leaf-blight': {
+                id: 'corn-northern-leaf-blight',
+                name: 'Corn Northern Leaf Blight',
+                image: "{{ url_for('static', filename='images/cornnorthernleafblight.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'High',
+                plants: 'Corn',
+                description: 'Northern leaf blight is caused by the fungus Exserohilum turcicum. It appears as long, gray-green lesions on corn leaves, leading to reduced photosynthesis and yield losses.',
+                symptoms: [
+                    'Gray-green, elongated lesions on leaves',
+                    'Lesions turn tan with a dark border',
+                    'Severe infections lead to leaf death',
+                    'Premature ear development in infected plants'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Plant resistant corn hybrids',
+                        'Rotate crops to reduce fungal spores',
+                        'Use tillage to bury infected residues'
+                    ],
+                    'Organic Treatment': [
+                        'Apply copper-based fungicides',
+                        'Use neem oil to suppress fungal growth',
+                        'Improve soil health with organic amendments'
+                    ],
+                    'Chemical Treatment': [
+                        'Use fungicides with strobilurins or triazoles',
+                        'Begin application at first signs of lesions',
+                        'Repeat every 10-14 days in humid conditions'
+                    ]
+                }
+            },
+            'grape-black-rot': {
+                id: 'grape-black-rot',
+                name: 'Grape Black Rot',
+                image: "{{ url_for('static', filename='images/black-rot-of-grape_figure1.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'High',
+                plants: 'Grape',
+                description: 'Black rot is a fungal disease caused by Guignardia bidwellii. It affects grape leaves, stems, and fruit, leading to shriveled black mummies that reduce yield and vine health.',
+                symptoms: [
+                    'Circular brown spots on leaves',
+                    'Dark, sunken lesions on stems',
+                    'Black shriveled fruit (mummies)',
+                    'Defoliation and weakened vines'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Prune vines to improve airflow',
+                        'Remove mummified fruit from vines and ground',
+                        'Apply mulch to prevent soil splash'
+                    ],
+                    'Organic Treatment': [
+                        'Use copper or sulfur-based sprays',
+                        'Apply neem oil to infected areas',
+                        'Increase soil fertility with compost applications'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides with myclobutanil or mancozeb',
+                        'Spray at bloom and every 10-14 days afterward',
+                        'Maintain protection throughout the growing season'
+                    ]
+                }
+            },
+            'grape-esca': {
+                id: 'grape-esca',
+                name: 'Grape Esca (Black Measles)',
+                image: "{{ url_for('static', filename='images/grapeesca.jpeg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'High',
+                plants: 'Grape',
+                description: 'Esca, or Black Measles, is a fungal disease complex caused by multiple pathogens. It affects the vascular system of grapevines, leading to internal wood decay and spotted fruit.',
+                symptoms: [
+                    'Interveinal chlorosis (tiger striping) on leaves',
+                    'Black, sunken lesions on fruit',
+                    'Internal wood decay with brown streaks',
+                    'Wilting and dieback in severe cases'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Prune and remove infected wood',
+                        'Avoid mechanical injuries to vines',
+                        'Increase soil drainage and aeration'
+                    ],
+                    'Organic Treatment': [
+                        'Apply beneficial microbes to suppress fungal growth',
+                        'Use organic compost to improve vine resistance',
+                        'Spray biofungicides based on Bacillus species'
+                    ],
+                    'Chemical Treatment': [
+                        'Use systemic fungicides during early growth stages',
+                        'Apply protective sprays before rainy seasons',
+                        'Maintain rigorous vineyard sanitation practices'
+                    ]
+                }
+            },
+            'grape-leaf-blight': {
+                id: 'grape-leaf-blight',
+                name: 'Grape Leaf Blight',
+                image: "{{ url_for('static', filename='images/grapeleafblight.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Medium',
+                plants: 'Grape',
+                description: 'Grape leaf blight (Black Rot) is caused by the fungus Guignardia bidwellii. It affects all green parts of the vine but is particularly damaging to leaves and fruit. The disease thrives in warm, humid conditions and can cause significant crop losses if left untreated.',
+                symptoms: [
+                    'Small, brown circular lesions on leaves',
+                    'Dark brown to black spots with yellow margins',
+                    'Lesions expand and merge forming irregular patches',
+                    'Infected berries shrivel and become mummified'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Remove infected plant debris in fall',
+                        'Prune to improve air circulation',
+                        'Plant resistant varieties when possible',
+                        'Avoid overhead irrigation'
+                    ],
+                    'Organic Treatment': [
+                        'Apply copper-based fungicides',
+                        'Use potassium bicarbonate sprays',
+                        'Apply compost tea to strengthen plant defenses'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides containing myclobutanil or thiophanate-methyl',
+                        'Start treatments when new shoots are 5-6 inches long',
+                        'Continue applications every 10-14 days in wet weather'
+                    ]
+                }
+            },
+            'citrus-greening': {
+                id: 'citrus-greening',
+                name: 'Huanglongbing (Citrus Greening)',
+                image: "{{ url_for('static', filename='images/citrus greening.jpg') }}",
+                category: 'Bacterial Disease',
+                badge: 'bacterial',
+                severity: 'Severe',
+                plants: 'Citrus trees',
+                description: 'Huanglongbing (HLB), also known as citrus greening, is caused by the bacterium Candidatus Liberibacter asiaticus and spread by the Asian citrus psyllid. It is one of the most devastating citrus diseases worldwide, causing tree decline and eventual death.',
+                symptoms: [
+                    'Asymmetrical yellow mottling of leaves',
+                    'Stunted, upright leaves with blotchy mottle',
+                    'Lopsided, bitter-tasting fruit with small, dark seeds',
+                    'Premature fruit drop and twig dieback'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Use certified disease-free nursery stock',
+                        'Control psyllid populations with regular monitoring',
+                        'Remove and destroy infected trees',
+                        'Implement area-wide pest management strategies'
+                    ],
+                    'Organic Treatment': [
+                        'Use insecticidal soaps for psyllid control',
+                        'Apply neem oil to suppress psyllid populations',
+                        'Maintain optimal tree nutrition to extend productive life'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply systemic insecticides for psyllid control',
+                        'Treat surrounding areas to reduce insect populations',
+                        'Use foliar nutrients and antibiotics where legally permitted',
+                        'Note: No cure exists; management focuses on prolonging tree life'
+                    ]
+                }
+            },
+            'peach-bacterial-spot': {
+                id: 'peach-bacterial-spot',
+                name: 'Peach Bacterial Spot',
+                image: "{{ url_for('static', filename='images/peachbacterialspot.jpg') }}",
+                category: 'Bacterial Disease',
+                badge: 'bacterial',
+                severity: 'Medium',
+                plants: 'Peach, Nectarine, Apricot, Plum',
+                description: 'Peach bacterial spot is caused by Xanthomonas arboricola pv. pruni. It affects stone fruits, causing lesions on leaves, fruit, and twigs. The disease is most severe in warm, wet weather and can significantly reduce fruit quality and yield.',
+                symptoms: [
+                    'Small, water-soaked lesions on leaves that turn purple-black',
+                    'Spots may fall out creating a "shot-hole" appearance',
+                    'Sunken, dark lesions on fruit that may crack',
+                    'Cankers and gumming on twigs and branches'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Plant resistant varieties when available',
+                        'Improve air circulation through proper pruning',
+                        'Avoid overhead irrigation',
+                        'Remove and destroy infected leaves and fruit'
+                    ],
+                    'Organic Treatment': [
+                        'Apply copper-based bactericides at leaf drop and early spring',
+                        'Use compost tea to improve plant resistance',
+                        'Apply microbial antagonists where available'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply copper-based bactericides at bud break',
+                        'Continue applications every 7-14 days during wet periods',
+                        'Rotate with oxytetracycline products where permitted',
+                        'Apply dormant sprays containing copper in late fall'
+                    ]
+                }
+            },
+            'pepper-bacterial-spot': {
+                id: 'pepper-bacterial-spot',
+                name: 'Pepper Bacterial Spot',
+                image: "{{ url_for('static', filename='images/Pepper Bacterial Spot.jpeg') }}",
+                category: 'Bacterial Disease',
+                badge: 'bacterial',
+                severity: 'Medium to High',
+                plants: 'Peppers, Tomatoes',
+                description: 'Pepper bacterial spot is caused by several Xanthomonas species. It affects leaves, stems, and fruit, causing spots and lesions. The disease is favored by warm, wet conditions and can spread rapidly through splashing water and contaminated equipment.',
+                symptoms: [
+                    'Small, water-soaked spots on leaves that turn brown or black',
+                    'Spots may merge to form large necrotic areas',
+                    'Raised, scabby lesions on fruit',
+                    'Premature leaf drop and reduced yield'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Use disease-free seeds and transplants',
+                        'Rotate crops; avoid planting peppers after tomatoes or other solanaceous crops',
+                        'Improve air circulation and avoid overhead irrigation',
+                        'Remove and destroy crop debris after harvest'
+                    ],
+                    'Organic Treatment': [
+                        'Apply copper-based bactericides early in the growing season',
+                        'Use plant resistance inducers like acibenzolar-S-methyl',
+                        'Apply microbial antagonists (Bacillus and Pseudomonas species)'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply copper-based bactericides mixed with mancozeb for better efficacy',
+                        'Begin treatments before symptoms appear if disease is expected',
+                        'Reapply every 7-10 days during favorable conditions',
+                        'Rotate chemical classes to prevent resistance development'
+                    ]
+                }
+            },
+            'potato-early-blight': {
+                id: 'potato-early-blight',
+                name: 'Potato Early Blight',
+                image: "{{ url_for('static', filename='images/Potato Early Blight.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Medium',
+                plants: 'Potato, Tomato, other Solanaceae',
+                description: 'Potato early blight is caused by the fungus Alternaria solani. It primarily affects leaves and stems, but can also infect tubers. The disease is favored by warm, wet conditions and can significantly reduce yields if not managed properly.',
+                symptoms: [
+                    'Dark, concentric rings forming bull\'s-eye pattern on leaves',
+                    'Yellowing and browning of leaf tissue around lesions',
+                    'Premature defoliation starting with lower leaves',
+                    'Shallow, dark lesions on tubers'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Plant certified disease-free seed potatoes',
+                        'Use crop rotation with non-host plants',
+                        'Ensure proper plant spacing for good air circulation',
+                        'Remove volunteer plants and nightshade weeds'
+                    ],
+                    'Organic Treatment': [
+                        'Apply copper-based fungicides preventatively',
+                        'Use compost tea or biofungicides containing Bacillus subtilis',
+                        'Apply neem oil every 7-14 days during growing season'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides containing chlorothalonil, azoxystrobin, or boscalid',
+                        'Begin applications when plants are 6-8 inches tall',
+                        'Continue at 7-14 day intervals depending on conditions',
+                        'Alternate fungicide classes to prevent resistance'
+                    ]
+                }
+            },
+            'potato-late-blight': {
+                id: 'potato-late-blight',
+                name: 'Potato Late Blight',
+                image: "{{ url_for('static', filename='images/Potato Late Blight.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Severe',
+                plants: 'Potato, Tomato, other Solanaceae',
+                description: 'Potato late blight is caused by the oomycete Phytophthora infestans, infamous for causing the Irish potato famine. It can rapidly destroy entire fields under favorable conditions (cool, wet weather). The pathogen can infect all plant parts and spreads through air-borne spores.',
+                symptoms: [
+                    'Water-soaked, gray-green lesions on leaves that quickly turn brown or black',
+                    'White, fuzzy growth on leaf undersides in humid conditions',
+                    'Dark, firm lesions on tubers that may lead to soft rot',
+                    'Rapid plant collapse in severe cases'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Plant resistant varieties when available',
+                        'Use certified disease-free seed potatoes',
+                        'Space plants for good air circulation',
+                        'Monitor weather forecasts for late blight risk'
+                    ],
+                    'Organic Treatment': [
+                        'Apply copper-based fungicides before disease onset',
+                        'Reapply after rain events or every 5-7 days in wet conditions',
+                        'Remove and destroy infected plants immediately'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply protective fungicides (chlorothalonil, mancozeb) before disease appears',
+                        'Switch to systemic fungicides (metalaxyl, cymoxanil) if disease is present',
+                        'Reapply every 5-7 days during favorable conditions',
+                        'Use fungicide mixtures with different modes of action'
+                    ]
+                }
+            },
+            'powdery-mildew': {
+                id: 'powdery-mildew',
+                name: 'Powdery Mildew',
+                image: "{{ url_for('static', filename='images/powder.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Medium',
+                plants: 'Common in many Plants',
+                description: 'Powdery mildew is caused by several fungal species in the Erysiphales order. Unlike most fungal diseases, it can thrive in dry conditions with high humidity. It primarily affects leaves and stems, covering them with a characteristic white, powdery growth.',
+                symptoms: [
+                    'White, powdery spots or patches on leaves and stems',
+                    'Yellowing and distortion of affected leaves',
+                    'Stunted growth and reduced yields',
+                    'Premature leaf drop and weakened plants'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Plant resistant varieties when available',
+                        'Maintain proper plant spacing for good air circulation',
+                        'Avoid excessive nitrogen fertilization',
+                        'Water in the morning at soil level to keep foliage dry'
+                    ],
+                    'Organic Treatment': [
+                        'Apply potassium bicarbonate or sodium bicarbonate solutions',
+                        'Use neem oil or sulfur-based fungicides',
+                        'Apply milk spray (1:10 milk to water ratio)',
+                        'Use compost tea to boost plant immunity'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides containing trifloxystrobin, myclobutanil, or tebuconazole',
+                        'Begin applications at first sign of disease',
+                        'Alternate between chemical classes to prevent resistance',
+                        'Reapply every 7-14 days as needed'
+                    ]
+                }
+            },
+            'strawberry-leaf-scorch': {
+                id: 'strawberry-leaf-scorch',
+                name: 'Strawberry Leaf Scorch',
+                image: "{{ url_for('static', filename='images/Strawberry Leaf Scorch.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Medium',
+                plants: 'Strawberry',
+                description: 'Strawberry leaf scorch is caused by the fungus Diplocarpon earlianum. It affects primarily the leaves, causing purplish-red spots that eventually turn brown with a yellow halo. Severe infections can reduce plant vigor and fruit yield.',
+                symptoms: [
+                    'Small, purplish-red spots on upper leaf surfaces',
+                    'Spots enlarge and develop reddish-purple to brown centers',
+                    'Leaf edges turn brown and appear scorched',
+                    'Infected leaves may curl upward and dry out'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Plant resistant varieties when available',
+                        'Renovate strawberry beds annually',
+                        'Remove old, infected leaves',
+                        'Use drip irrigation to keep foliage dry'
+                    ],
+                    'Organic Treatment': [
+                        'Apply copper-based fungicides in early spring',
+                        'Use compost tea as a preventative spray',
+                        'Apply sulfur products before disease appears'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides containing myclobutanil or captan',
+                        'Begin treatments at first sign of disease',
+                        'Continue applications every 7-14 days as needed',
+                        'Rotate between different chemical classes'
+                    ]
+                }
+            },
+            'tomato-early-blight': {
+                id: 'tomato-early-blight',
+                name: 'Tomato Early Blight',
+                image: "{{ url_for('static', filename='images/Tomato Early Blight.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Medium',
+                plants: 'Tomato, Potato, other Solanaceae',
+                description: 'Tomato early blight is caused by the fungus Alternaria solani. It primarily affects older leaves, stems, and fruit. The disease thrives in warm, humid conditions and can significantly reduce yields if not managed properly.',
+                symptoms: [
+                    'Dark brown lesions with concentric rings (bull\'s-eye pattern)',
+                    'Yellowing of leaf tissue around lesions',
+                    'Lesions may coalesce causing entire leaves to wither',
+                    'Dark, sunken lesions on fruit, usually at the stem end'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Rotate crops, avoiding solanaceous plants for 3-4 years',
+                        'Use mulch to prevent soil-splash onto lower leaves',
+                        'Space plants for good air circulation',
+                        'Remove and destroy infected plant parts'
+                    ],
+                    'Organic Treatment': [
+                        'Apply copper-based fungicides preventatively',
+                        'Use compost tea to strengthen plant defenses',
+                        'Apply neem oil every 7-10 days during growing season'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides containing chlorothalonil, mancozeb, or azoxystrobin',
+                        'Begin applications when first symptoms appear',
+                        'Continue at 7-14 day intervals depending on weather',
+                        'Alternate between different fungicide classes'
+                    ]
+                }
+            },
+            'tomato-late-blight': {
+                id: 'tomato-late-blight',
+                name: 'Tomato Late Blight',
+                image: "{{ url_for('static', filename='images/Tomato Late Blight.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Severe',
+                plants: 'Tomato, Potato, other Solanaceae',
+                description: 'Tomato late blight is caused by the oomycete Phytophthora infestans. It can rapidly devastate entire crops in cool, wet weather. The disease affects all above-ground parts of the plant and can spread quickly through airborne spores.',
+                symptoms: [
+                    'Water-soaked, gray-green patches on leaves',
+                    'White, fuzzy growth on undersides of leaves in humid conditions',
+                    'Dark brown lesions on stems and petioles',
+                    'Firm, dark, greasy-looking lesions on fruit'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Plant resistant varieties when available',
+                        'Avoid overhead irrigation and water at the base of plants',
+                        'Space plants for good air circulation',
+                        'Remove volunteer tomato and potato plants'
+                    ],
+                    'Organic Treatment': [
+                        'Apply copper-based fungicides preventatively',
+                        'Reapply after rain or every 5-7 days in wet conditions',
+                        'Remove and destroy infected plants immediately'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply protectant fungicides (chlorothalonil, mancozeb) before symptoms appear',
+                        'Use systemic fungicides (cymoxanil, mefenoxam) if disease is present',
+                        'Apply every 5-7 days during favorable conditions',
+                        'Combine products with different modes of action'
+                    ]
+                }
+            },
+            'tomato-leaf-mold': {
+                id: 'tomato-leaf-mold',
+                name: 'Tomato Leaf Mold',
+                image: "{{ url_for('static', filename='images/Tomato Leaf Mold.jpeg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Medium',
+                plants: 'Tomato',
+                description: 'Tomato leaf mold is caused by the fungus Passalora fulva (formerly Cladosporium fulvum). It primarily affects leaves and occasionally stems, petioles, and fruit. The disease is most common in greenhouse tomatoes or in areas with high humidity.',
+                symptoms: [
+                    'Pale green or yellow spots on upper leaf surfaces',
+                    'Olive-green to brown velvety growth on leaf undersides',
+                    'Leaves may curl, wither, and drop prematurely',
+                    'Rarely, shallow lesions may develop on fruit'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Plant resistant varieties when available',
+                        'Improve air circulation and reduce humidity',
+                        'Use drip irrigation instead of overhead watering',
+                        'Space plants properly and prune for better airflow'
+                    ],
+                    'Organic Treatment': [
+                        'Apply copper-based fungicides at first sign of disease',
+                        'Use potassium bicarbonate sprays',
+                        'Apply compost tea to boost plant immunity'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides containing chlorothalonil or mancozeb',
+                        'Begin applications when symptoms first appear',
+                        'Continue at 7-14 day intervals as needed',
+                        'Ensure good coverage of lower leaf surfaces'
+                    ]
+                }
+            },
+            'tomato-septoria': {
+                id: 'tomato-septoria',
+                name: 'Tomato Septoria Leaf Spot',
+                image: "{{ url_for('static', filename='images/Tomato Septoria Leaf Spot.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Medium',
+                plants: 'Tomato',
+                description: 'Tomato Septoria leaf spot is caused by the fungus Septoria lycopersici. It primarily affects leaves, starting with lower leaves and moving upward. The disease thrives in warm, wet conditions and can severely defoliate plants if not controlled.',
+                symptoms: [
+                    'Small, circular spots with dark borders and gray or tan centers',
+                    'Spots may have yellow halos and tiny black fruiting bodies in centers',
+                    'Lower leaves are affected first, then disease progresses upward',
+                    'Severe infection leads to leaf yellowing, withering, and drop'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Rotate crops, avoiding tomatoes and related plants for 2-3 years',
+                        'Remove and destroy infected plant debris',
+                        'Use mulch to prevent soil splash onto leaves',
+                        'Avoid overhead irrigation'
+                    ],
+                    'Organic Treatment': [
+                        'Apply copper-based fungicides preventatively',
+                        'Use compost tea as a preventative spray',
+                        'Apply neem oil or sulfur-based fungicides'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides containing chlorothalonil, mancozeb, or copper compounds',
+                        'Begin applications when disease first appears',
+                        'Continue at 7-14 day intervals during favorable conditions',
+                        'Ensure thorough coverage of all leaf surfaces'
+                    ]
+                }
+            },
+            'tomato-spider-mites': {
+                id: 'tomato-spider-mites',
+                name: 'Tomato Spider Mites',
+                image: "{{ url_for('static', filename='images/Tomato Spider Mites.jpeg') }}",
+                category: 'Pest',
+                badge: 'pest',
+                severity: 'Medium',
+                plants: 'Tomato, many other crops and ornamentals',
+                description: 'Spider mites (primarily Tetranychus urticae) are tiny arachnids that feed on plant cells, causing stippling and discoloration. They thrive in hot, dry conditions and can rapidly build up populations, especially in greenhouse environments.',
+                symptoms: [
+                    'Fine yellow or white stippling on leaf surfaces',
+                    'Webbing on leaf undersides and between leaves and stems',
+                    'Bronzing or yellowing of leaves, progressing to browning',
+                    'Stunted growth and reduced yields in severe infestations'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Maintain adequate soil moisture to prevent water stress',
+                        'Regularly spray plants with water to dislodge mites',
+                        'Introduce predatory mites as biological control',
+                        'Monitor plants regularly, especially in hot, dry weather'
+                    ],
+                    'Organic Treatment': [
+                        'Apply insecticidal soap or horticultural oil to affected areas',
+                        'Use neem oil every 7 days until infestation is controlled',
+                        'Apply diatomaceous earth around plant bases',
+                        'Release predatory mites like Phytoseiulus persimilis'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply miticides containing bifenazate, abamectin, or spiromesifen',
+                        'Ensure thorough coverage of leaf undersides',
+                        'Repeat applications after 7-10 days to control newly hatched mites',
+                        'Rotate between different chemical classes to prevent resistance'
+                    ]
+                }
+            },
+            'tomato-target-spot': {
+                id: 'tomato-target-spot',
+                name: 'Tomato Target Spot',
+                image: "{{ url_for('static', filename='images/Tomato Target Spot.jpg') }}",
+                category: 'Fungal Disease',
+                badge: 'fungal',
+                severity: 'Medium',
+                plants: 'Tomato',
+                description: 'Tomato target spot is caused by the fungus Corynespora cassiicola. It affects leaves, stems, and fruit, causing circular lesions with concentric rings. The disease thrives in warm, humid conditions and can cause significant yield loss if not managed.',
+                symptoms: [
+                    'Brown to black circular lesions with concentric rings (target-like appearance)',
+                    'Lesions may have yellow halos and can coalesce',
+                    'Fruit lesions appear as small, dark, sunken spots that expand',
+                    'Severe infections cause defoliation and sunscald on exposed fruit'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Use disease-free seeds and transplants',
+                        'Rotate crops, avoiding solanaceous plants for 2-3 years',
+                        'Improve air circulation through proper spacing and pruning',
+                        'Use drip irrigation to keep foliage dry'
+                    ],
+                    'Organic Treatment': [
+                        'Apply copper-based fungicides at first sign of disease',
+                        'Use compost tea to boost plant immunity',
+                        'Remove and destroy infected plant parts'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply fungicides containing chlorothalonil, mancozeb, or azoxystrobin',
+                        'Begin treatments when symptoms first appear',
+                        'Continue applications every 7-14 days during favorable conditions',
+                        'Rotate between different fungicide classes'
+                    ]
+                }
+            },
+            'tomato-yellow-leaf-curl': {
+                id: 'tomato-yellow-leaf-curl',
+                name: 'Tomato Yellow Leaf Curl Virus',
+                image: "{{ url_for('static', filename='images/Tomato Yellow Leaf Curl Virus.jpg') }}",
+                category: 'Viral Disease',
+                badge: 'viral',
+                severity: 'Severe',
+                plants: 'Tomato, occasionally other solanaceous plants',
+                description: 'Tomato yellow leaf curl virus (TYLCV) is a begomovirus transmitted by whiteflies (Bemisia tabaci). It causes severe stunting and yield loss in tomatoes. The virus can persist in alternative hosts and be spread by infected transplants.',
+                symptoms: [
+                    'Upward curling and yellowing of leaves',
+                    'Stunted growth and reduced plant size',
+                    'Flower drop and greatly reduced fruit set',
+                    'Leaves may appear crumpled, cupped, and smaller than normal'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Plant resistant varieties (look for TYLCV resistance)',
+                        'Use reflective mulches to repel whiteflies',
+                        'Install fine mesh screens in greenhouse production',
+                        'Remove and destroy infected plants immediately'
+                    ],
+                    'Organic Treatment': [
+                        'Control whitefly populations with yellow sticky traps',
+                        'Apply insecticidal soaps or neem oil to reduce whitefly numbers',
+                        'Use row covers to exclude whiteflies',
+                        'Note: Once infected, plants cannot be cured'
+                    ],
+                    'Chemical Treatment': [
+                        'Apply systemic insecticides to control whitefly vectors',
+                        'Use imidacloprid or other neonicotinoids as soil drenches',
+                        'Alternate with different insecticide classes to prevent resistance',
+                        'Remove infected plants as there is no cure for the virus'
+                    ]
+                }
+            },
+            'tomato-mosaic-virus': {
+                id: 'tomato-mosaic-virus',
+                name: 'Tomato Mosaic Virus',
+                image: "{{ url_for('static', filename='images/tomato Mosaic Virus.jpg') }}",
+                category: 'Viral Disease',
+                badge: 'viral',
+                severity: 'Severe',
+                plants: 'Tomato, Pepper, many other solanaceous plants',
+                description: 'Tomato mosaic virus (ToMV) and the related Tobacco mosaic virus (TMV) are highly stable viruses that can survive for years in plant debris. They are primarily spread through mechanical transmission, infected seeds, and handling of plants.',
+                symptoms: [
+                    'Mottled light and dark green pattern on leaves',
+                    'Leaf distortion, curling, and reduced size',
+                    'Stunted plant growth and reduced yields',
+                    'Yellow blotches, rings, or streaks on fruit'
+                ],
+                treatments: {
+                    'Preventive Measures': [
+                        'Plant virus-resistant varieties (look for TMV/ToMV resistance)',
+                        'Use certified disease-free seeds and seedlings',
+                        'Disinfect tools, stakes, and hands with 70% alcohol or 10% bleach solution',
+                        'Remove and destroy infected plants'
+                    ],
+                    'Organic Treatment': [
+                        'There are no organic treatments that can cure infected plants',
+                        'Practice strict sanitation to prevent spread',
+                        'Remove infected plants immediately',
+                        'Apply milk spray (1:9 milk to water) as a preventative'
+                    ],
+                    'Chemical Treatment': [
+                        'No chemical treatments can cure infected plants',
+                        'Focus on prevention through sanitation and resistant varieties',
+                        'Remove and destroy infected plants to prevent spread',
+                        'Maintain weed control as many weeds can harbor the virus'
+                    ]
+                }
+            }
+        };
+
+        // Group diseases by category for dropdown menus
+        const fungalDiseases = Object.values(diseaseData).filter(disease => disease.badge === 'fungal');
+        const bacterialDiseases = Object.values(diseaseData).filter(disease => disease.badge === 'bacterial');
+        const viralDiseases = Object.values(diseaseData).filter(disease => disease.badge === 'viral');
+        const pestDiseases = Object.values(diseaseData).filter(disease => disease.badge === 'pest');
+
+        // Group diseases by plant type for display
+        const diseasesByPlant = {};
+        
+        Object.values(diseaseData).forEach(disease => {
+            // Get the first plant type mentioned (before any commas)
+            const plantType = disease.plants.split(',')[0].trim();
+            
+            if (!diseasesByPlant[plantType]) {
+                diseasesByPlant[plantType] = [];
+            }
+            
+            diseasesByPlant[plantType].push(disease);
+        });
+
+        // Populate the category dropdowns
+        function populateCategoryDropdowns() {
+            const fungalDropdown = document.getElementById('fungal-dropdown');
+            const bacterialDropdown = document.getElementById('bacterial-dropdown');
+            const viralDropdown = document.getElementById('viral-dropdown');
+            const pestDropdown = document.getElementById('pest-dropdown');
+            
+            // Populate fungal diseases dropdown
+            fungalDiseases.forEach(disease => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = disease.name;
+                item.onclick = () => openModal(disease.id);
+                fungalDropdown.appendChild(item);
+            });
+            
+            // Populate bacterial diseases dropdown
+            bacterialDiseases.forEach(disease => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = disease.name;
+                item.onclick = () => openModal(disease.id);
+                bacterialDropdown.appendChild(item);
+            });
+            
+            // Populate viral diseases dropdown
+            viralDiseases.forEach(disease => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = disease.name;
+                item.onclick = () => openModal(disease.id);
+                viralDropdown.appendChild(item);
+            });
+            
+            // Populate pest diseases dropdown
+            pestDiseases.forEach(disease => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.textContent = disease.name;
+                item.onclick = () => openModal(disease.id);
+                pestDropdown.appendChild(item);
+            });
+        }
+
+        // Display diseases grouped by plant type using the HTML structure shown in the screenshot
+        function displayDiseasesByPlant() {
+            const container = document.getElementById('disease-categories');
+            container.innerHTML = '';
+            
+            // Get all plant types and sort alphabetically
+            const plantTypes = Object.keys(diseasesByPlant).sort();
+            
+            plantTypes.forEach(plantType => {
+                const plantDiseases = diseasesByPlant[plantType];
+                
+                // Create section header with the format shown in the screenshot
+                const sectionHTML = `
+                    <!-- ${plantType} Diseases -->
+                    <h2 class="category-heading">${plantType}</h2>
+                    <div class="disease-grid">
+                        ${plantDiseases.map(disease => `
+                            <!-- ${disease.name} -->
+                            <div class="disease-card" onclick="openModal('${disease.id}')">
+                                <div class="disease-image">
+                                    <img src="${disease.image}" alt="${disease.name}">
+                                    <div class="disease-badge ${disease.badge}">${disease.category}</div>
+                                </div>
+                                <div class="disease-content">
+                                    <h3 class="disease-title">
+                                        <span>${disease.name}</span>
+                                        <i>→</i>
+                                    </h3>
+                                    <div class="disease-info">
+                                        <span class="disease-info-label">Affects: </span>
+                                        <span class="disease-info-value">${disease.plants}</span>
+                                    </div>
+                                    <p class="disease-description">${disease.description}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                container.innerHTML += sectionHTML;
+            });
+        }
+
+        // Show search results based on input
+        function showSearchResults(term) {
+            const searchDropdown = document.getElementById('search-dropdown');
+            searchDropdown.innerHTML = '';
+            
+            if (term.length < 2) {
+                searchDropdown.classList.remove('show');
+                return;
+            }
+            
+            const results = Object.values(diseaseData).filter(disease => 
+                disease.name.toLowerCase().includes(term.toLowerCase()) || 
+                disease.plants.toLowerCase().includes(term.toLowerCase())
+            );
+            
+            if (results.length > 0) {
+                results.forEach(disease => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'search-result';
+                    resultItem.onclick = () => {
+                        openModal(disease.id);
+                        searchDropdown.classList.remove('show');
+                        document.getElementById('search-input').value = '';
+                    };
+                    
+                    resultItem.innerHTML = `
+                        <div class="result-image">
+                            <img src="${disease.image}" alt="${disease.name}">
+                        </div>
+                        <div class="result-info">
+                            <h4>${disease.name}</h4>
+                            <p>${disease.category}</p>
+                        </div>
+                    `;
+                    
+                    searchDropdown.appendChild(resultItem);
+                });
+                
+                searchDropdown.classList.add('show');
+            } else {
+                searchDropdown.classList.remove('show');
+            }
+        }
+
+        // Search input event listener
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            showSearchResults(e.target.value);
+        });
+
+        // Search input keydown event for Enter key
+        document.getElementById('search-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const term = e.target.value.toLowerCase();
+                if (term.length >= 2) {
+                    const results = Object.values(diseaseData).filter(disease => 
+                        disease.name.toLowerCase().includes(term) || 
+                        disease.plants.toLowerCase().includes(term)
+                    );
+                    
+                    if (results.length > 0) {
+                        openModal(results[0].id);
+                        document.getElementById('search-dropdown').classList.remove('show');
+                        e.target.value = '';
+                    }
+                }
+            }
+        });
+
+        // Open disease modal
+        function openModal(diseaseId) {
+            const disease = diseaseData[diseaseId];
+            
+            if (disease) {
+                document.getElementById('modal-title').textContent = disease.name;
+                document.getElementById('modal-image').src = disease.image;
+                document.getElementById('modal-image').alt = disease.name;
+                document.getElementById('modal-badge').textContent = disease.category;
+                document.getElementById('modal-badge').className = `modal-badge ${disease.badge}`;
+                document.getElementById('modal-severity').textContent = `Severity: ${disease.severity}`;
+                document.getElementById('modal-plants').textContent = `Affects: ${disease.plants}`;
+                
+                let modalBody = document.getElementById('modal-body');
+                modalBody.innerHTML = `
+                    <div class="modal-section">
+                        <h3 class="modal-section-title">Description</h3>
+                        <div class="modal-section-content">${disease.description}</div>
+                    </div>
+                    
+                    <div class="modal-section">
+                        <h3 class="modal-section-title">Symptoms</h3>
+                        <ul class="symptom-list">
+                            ${disease.symptoms.map(symptom => `
+                                <li class="symptom-item">
+                                    <div class="symptom-indicator"></div>
+                                    <div>${symptom}</div>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="modal-section">
+                        <h3 class="modal-section-title">Treatment & Prevention</h3>
+                        
+                        <div class="treatment-accordion">
+                            <div class="treatment-header" onclick="toggleTreatment(this)">
+                                <div class="treatment-title">Preventive Measures</div>
+                                <div class="treatment-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                            </div>
+                            <div class="treatment-content">
+                                <ol class="treatment-steps">
+                                    ${disease.treatments['Preventive Measures'].map((step, index) => `
+                                        <li class="treatment-step">
+                                            <div class="step-number">${index + 1}</div>
+                                            <div>${step}</div>
+                                        </li>
+                                    `).join('')}
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="treatment-accordion">
+                            <div class="treatment-header" onclick="toggleTreatment(this)">
+                                <div class="treatment-title">Organic Treatment</div>
+                                <div class="treatment-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                            </div>
+                            <div class="treatment-content">
+                                <ol class="treatment-steps">
+                                    ${disease.treatments['Organic Treatment'].map((step, index) => `
+                                        <li class="treatment-step">
+                                            <div class="step-number">${index + 1}</div>
+                                            <div>${step}</div>
+                                        </li>
+                                    `).join('')}
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="treatment-accordion">
+                            <div class="treatment-header" onclick="toggleTreatment(this)">
+                                <div class="treatment-title">Chemical Treatment</div>
+                                <div class="treatment-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                </div>
+                            </div>
+                            <div class="treatment-content">
+                                <ol class="treatment-steps">
+                                    ${disease.treatments['Chemical Treatment'].map((step, index) => `
+                                        <li class="treatment-step">
+                                            <div class="step-number">${index + 1}</div>
+                                            <div>${step}</div>
+                                        </li>
+                                    `).join('')}
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('disease-modal').classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // Close disease modal
+        function closeModal() {
+            document.getElementById('disease-modal').classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Initialize the page
+        populateCategoryDropdowns();
+        displayDiseasesByPlant();
+    </script>
+</body>
+</html>

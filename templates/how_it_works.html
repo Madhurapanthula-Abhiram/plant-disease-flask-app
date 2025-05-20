@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How PlantPulse Works - Plant Disease Identification</title>
+  <style>
+    /* Global Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f9f9f9;
+      color: #212121;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    /* Header Styles */
+    header {
+      background-color: white;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 50;
+      transition: all 0.3s;
+    }
+    
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      width: 100%;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 24px;
+      font-weight: 700;
+      color: #4CAF50;
+      transition: transform 0.3s;
+    }
+    
+    .logo:hover {
+      transform: scale(1.05);
+    }
+    
+    .nav-links {
+      display: none;
+      margin: 0 auto;
+    }
+    
+    @media (min-width: 768px) {
+      .nav-links {
+        display: flex;
+        gap: 32px;
+      }
+      
+      .nav-links a {
+        position: relative;
+        color: #333;
+        font-weight: 500;
+        transition: color 0.3s;
+      }
+      
+      .nav-links a:hover {
+        color: #4CAF50;
+      }
+      
+      .nav-links a::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        background-color: #4CAF50;
+        bottom: -5px;
+        left: 0;
+        transition: all 0.3s;
+      }
+      
+      .nav-links a:hover::after {
+        width: 100%;
+      }
+    }
+    
+    .auth-profile {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .auth-buttons {
+      display: none;
+    }
+    
+    @media (min-width: 640px) {
+      .auth-buttons {
+        display: flex;
+        gap: 12px;
+      }
+    }
+    
+    .profile-dropdown {
+      position: relative;
+    }
+    
+    .profile-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #E8F5E9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #2E7D32;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    
+    .profile-icon:hover {
+      transform: scale(1.1);
+    }
+    
+    .dropdown-menu {
+      position: absolute;
+      top: 48px;
+      right: 0;
+      width: 200px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 8px 0;
+      transition: all 0.3s;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      z-index: 50;
+    }
+    
+    .dropdown-menu.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    
+    .dropdown-menu a {
+      display: block;
+      padding: 8px 16px;
+      color: #333;
+      transition: background-color 0.2s;
+    }
+    
+    .dropdown-menu a:hover {
+      background-color: #E8F5E9;
+    }
+    
+    /* Button Styles */
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    
+    .btn-outline {
+      border: 1px solid #4CAF50;
+      color: #4CAF50;
+    }
+    
+    .btn-outline:hover {
+      background-color: #E8F5E9;
+    }
+    
+    .btn-primary {
+      background-color: #4CAF50;
+      color: white;
+      border: 1px solid #4CAF50;
+    }
+    
+    .btn-primary:hover {
+      background-color: #388E3C;
+    }
+    
+    /* Hero Section */
+    .hero-section {
+      padding-top: 112px;
+      padding-bottom: 64px;
+      background: linear-gradient(to bottom right, #C8E6C9 0%, #FFFFFF 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: rgba(76, 175, 80, 0.1);
+      filter: blur(50px);
+      z-index: 0;
+    }
+    
+    .hero-section::after {
+      content: '';
+      position: absolute;
+      bottom: -100px;
+      left: 30%;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: rgba(76, 175, 80, 0.1);
+      filter: blur(70px);
+      z-index: 0;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .hero-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      background-color: #E8F5E9;
+      color: #2E7D32;
+      font-weight: 500;
+      border-radius: 50px;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeIn 0.6s ease 0.2s forwards;
+    }
+    
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: #212121;
+      opacity: 0;
+      animation: fadeIn 0.6s ease 0.4s forwards;
+    }
+    
+    @media (min-width: 768px) {
+      .hero-title {
+        font-size: 3.5rem;
+      }
+    }
+    
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: #616161;
+      margin-bottom: 32px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+      opacity: 0;
+      animation: fadeIn 0.6s ease 0.6s forwards;
+    }
+    
+    .tab-buttons {
+      display: inline-flex;
+      background-color: white;
+      padding: 6px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      opacity: 0;
+      animation: fadeIn 0.6s ease 0.8s forwards;
+    }
+    
+    .tab-button {
+      padding: 8px 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+      background: none;
+    }
+    
+    .tab-button.active {
+      background-color: #4CAF50;
+      color: white;
+    }
+    
+    /* Process Section */
+    .process-section {
+      padding: 80px 0;
+      position: relative;
+    }
+    
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #212121;
+      text-align: center;
+    }
+    
+    .section-subtitle {
+      font-size: 1.125rem;
+      color: #616161;
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 64px;
+    }
+    
+    .step-timeline {
+      position: relative;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .timeline-line {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background-color: #E8F5E9;
+      transform: translateX(-50%);
+      display: none;
+    }
+    
+    @media (min-width: 768px) {
+      .timeline-line {
+        display: block;
+      }
+    }
+    
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 80px;
+    }
+    
+    @media (min-width: 768px) {
+      .step {
+        flex-direction: row;
+      }
+      
+      .step:nth-child(even) {
+        flex-direction: row-reverse;
+      }
+      
+      .step:nth-child(odd) .step-content {
+        text-align: right;
+        padding-right: 40px;
+      }
+      
+      .step:nth-child(even) .step-content {
+        text-align: left;
+        padding-left: 40px;
+      }
+    }
+    
+    .step:last-child {
+      margin-bottom: 0;
+    }
+    
+    .step-content {
+      flex: 1;
+      margin-bottom: 24px;
+    }
+    
+    @media (min-width: 768px) {
+      .step-content {
+        margin-bottom: 0;
+      }
+    }
+    
+    .step-number {
+      width: 64px;
+      height: 64px;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 24px;
+      font-weight: 700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 24px;
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+    }
+    
+    .step-card {
+      flex: 1;
+      background-color: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .step-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+    
+    .step-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #212121;
+    }
+    
+    .step-description {
+      color: #616161;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    
+    .step-icon {
+      width: 56px;
+      height: 56px;
+      background-color: #E8F5E9;
+      color: #4CAF50;
+      font-size: 24px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    
+    .step-feature {
+      background-color: #f5f5f5;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .step-feature:last-child {
+      margin-bottom: 0;
+    }
+    
+    .step-feature-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .check-icon {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    
+
+    
+    /* CTA Section */
+    .cta-section {
+      padding: 80px 0;
+      background: linear-gradient(to right, #4CAF50, #66BB6A);
+      color: white;
+      text-align: center;
+    }
+    
+    .cta-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+    
+    .cta-description {
+      font-size: 1.25rem;
+      opacity: 0.9;
+      margin-bottom: 32px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .cta-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      justify-content: center;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    
+    @media (min-width: 640px) {
+      .cta-buttons {
+        flex-direction: row;
+      }
+    }
+    
+    .btn-white {
+      background-color: white;
+      color: #4CAF50;
+    }
+    
+    .btn-white:hover {
+      background-color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .btn-outline-white {
+      border: 2px solid white;
+      color: white;
+    }
+    
+    .btn-outline-white:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Footer */
+    /* Footer */
+    .footer {
+      background-color: #212121;
+      color: white;
+      padding: 64px 0 24px;
+    }
+    
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    
+    @media (min-width: 768px) {
+      .footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .footer-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    
+    .footer-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      position: relative;
+    }
+    
+    .footer-title::after {
+      content: '';
+      position: absolute;
+      word-spacing: 1PX;
+      width: 40px;
+      height: 2px;
+      background-color: #4CAF50;
+      bottom: 0;
+      left: 0;
+    }
+    
+    .footer-text {
+      color: #BDBDBD;
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+    
+    .social-links {
+      display: flex;
+      gap: 16px;
+    }
+    
+    .social-link {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: all 0.3s;
+    }
+    
+    .social-link:hover {
+      background-color: #4CAF50;
+      transform: translateY(-4px);
+    }
+    
+    .footer-links {
+      list-style: none;
+    }
+    
+    .footer-links li {
+      margin-bottom: 12px;
+    }
+    
+    .footer-links a {
+      color: #BDBDBD;
+      transition: color 0.3s;
+    }
+    
+    .footer-links a:hover {
+      color: #4CAF50;
+    }
+    
+    .footer-bottom {
+      text-align: center;
+      padding-top: 32px;
+      border-top: 1px solid #333;
+      color: #757575;
+      font-size: 0.875rem;
+    }
+    
+    .social-links {
+      display: flex;
+      gap: 16px;
+    }
+    
+    .social-link {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      transition: all 0.3s;
+    }
+    
+    .social-link:hover {
+      background-color: #4CAF50;
+      transform: translateY(-4px);
+    }
+    
+    .footer-links {
+      list-style: none;
+    }
+    
+    .footer-links li {
+      margin-bottom: 12px;
+    }
+    
+    .footer-links a {
+      color: #BDBDBD;
+      transition: color 0.3s;
+    }
+    
+    .footer-links a:hover {
+      color: #4CAF50;
+    }
+    
+    .footer-bottom {
+      text-align: center;
+      padding-top: 32px;
+      border-top: 1px solid #333;
+      color: #757575;
+      font-size: 0.875rem;
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .animate-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    
+    .animate-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header id="header">
+    <div class="container">
+      <nav>
+        <a href="index.html" class="logo">
+          <span>🌿</span> PlantPulse
+        </a>
+        
+        <div class="nav-links">
+          <a href="{{ url_for('plant') }}" class="home-link">Home</a>
+          <a href="{{ url_for('about') }}">About</a>
+          <a href="{{ url_for('disease') }}">Diseases</a>
+          <a href="{{ url_for('how_it_works') }}">How It Works</a>
+        </div>
+        
+        
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge">PlantPulse AI Technology</div>
+        <h1 class="hero-title">How <span style="color: #4CAF50;">PlantPulse</span> Works</h1>
+        <p class="hero-subtitle">Discover how our advanced AI technology identifies plant diseases with high accuracy and provides effective treatment recommendations.</p>
+        
+        <div class="tab-buttons">
+          <button class="tab-button active" onclick="scrollToSection('process')">The Process</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process Section -->
+  <section id="process" class="process-section">
+    <div class="container">
+      <h2 class="section-title">The PlantPulse Process</h2>
+      <p class="section-subtitle">Our simple and efficient 4-step process makes it easy to identify and treat plant diseases quickly.</p>
+      
+      <div class="step-timeline">
+        <div class="timeline-line"></div>
+        
+        <!-- Step 1 -->
+        <div class="step animate-in">
+          <div class="step-content">
+            <h3 class="step-title">Take a Clear Photo</h3>
+            <p class="step-description">Capture a clear, well-lit image of your plant's affected area showing the symptoms of disease. The clearer the image, the more accurate the diagnosis.</p>
+          </div>
+          
+          <div class="step-number">1</div>
+          
+          <div class="step-card">
+            <div class="step-icon">📷</div>
+            <h4>Photo Requirements</h4>
+            <div class="step-feature">
+              <p class="step-feature-title"><span class="check-icon">✓</span> Clear Focus</p>
+              <p>Make sure the image is in focus and clear</p>
+            </div>
+            <div class="step-feature">
+              <p class="step-feature-title"><span class="check-icon">✓</span> Good Lighting</p>
+              <p>Take photos in good light to show true colors</p>
+            </div>
+            <div class="step-feature">
+              <p class="step-feature-title"><span class="check-icon">✓</span> Avoid Shadows</p>
+              <p>Prevent shadows or glare on the affected area</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Step 2 -->
+        <div class="step animate-in">
+          <div class="step-content">
+            <h3 class="step-title">Upload to PlantPulse</h3>
+            <p class="step-description">Upload your photo to our platform using our website. The upload process is quick and secure, with your data protected.</p>
+          </div>
+          
+          <div class="step-number">2</div>
+          
+          <div class="step-card">
+            <div class="step-icon">📤</div>
+            <h4>Upload Options</h4>
+            <div class="step-feature">
+              <p class="step-feature-title"><span class="check-icon">✓</span> Web Upload</p>
+              <p>Compatible with all browsers</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Step 3 -->
+        <div class="step animate-in">
+          <div class="step-content">
+            <h3 class="step-title">AI Analysis</h3>
+            <p class="step-description">Our proprietary AI model analyzes your plant image, comparing it against our database of over 87,000 plant disease images to identify the specific condition.</p>
+          </div>
+          
+          <div class="step-number">3</div>
+          
+          <div class="step-card">
+            <div class="step-icon">🔍</div>
+            <h4>AI Technologies</h4>
+            <div class="step-feature">
+              <p class="step-feature-title"><span class="check-icon">✓</span> Image Preprocessing</p>
+              <p>We enhance and optimize your image for analysis</p>
+            </div>
+            <div class="step-feature">
+              <p class="step-feature-title"><span class="check-icon">✓</span> Deep Learning</p>
+              <p>Advanced neural networks identify patterns</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Step 4 -->
+        <div class="step animate-in">
+          <div class="step-content">
+            <h3 class="step-title">Get Results</h3>
+            <p class="step-description">Receive a detailed diagnosis with the identified disease.</p>
+          </div>
+          
+          <div class="step-number">4</div>
+          
+          <div class="step-card">
+            <div class="step-icon">📋</div>
+            <h4>Your Results Include</h4>
+            <div class="step-feature">
+              <p class="step-feature-title"><span class="check-icon">✓</span> Disease Identification</p>
+              <p>Name & detailed description of the disease</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 64px;">
+        <a href="{{ url_for('plant') }}" class="btn btn-primary">Try It Now</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <h2 class="cta-title">Ready to diagnose your plants?</h2>
+      <p class="cta-description">Join PlantPulse to keep their plants healthy and disease-free.</p>
+      
+      <div class="cta-buttons">
+        <a href="{{ url_for('plant') }}" class="btn btn-white">Try It Now</a>
+        <a href="{{ url_for('about') }}" class="btn btn-outline-white">Know More</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <h3 class="footer-title">About PlantPulse</h3>
+          <p class="footer-text">We use advanced AI technology to help plant lovers identify and treat plant diseases quickly and effectively.</p>
+          <div class="social-links">
+            <a href="#" class="social-link">📱</a>
+            <a href="#" class="social-link">💻</a>
+            <a href="#" class="social-link">📧</a>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="footer-title">Quick Links</h3>
+          <ul class="footer-links">
+            <li><a href="{{ url_for('plant') }}">Home</a></li>
+            <li><a href="{{ url_for('about') }}">About Us</a></li>
+            <li><a href="{{ url_for('disease') }}">Plant Diseases</a></li>
+            <li><a href="{{ url_for('how_it_works') }}">How to Use</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="footer-title">Our Team</h3>
+          <ul class="footer-links">
+            <li><a href="#">M.Abhiram</a></li>
+            <li><a href="#">M.Raghu Ram</a></li>
+            <li><a href="#">G.Chakravarthi</a></li>
+            <li><a href="#">A.Jaleel</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="footer-title">Roll Numbers</h3>
+          <p class="footer-text">21X41A4230</p>
+          <p class="footer-text">21X41A4233</p>
+          <p class="footer-text">21X41A4218</p>
+          <p class="footer-text">21X41A4201</p>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; <script>document.write(new Date().getFullYear())</script> PlantPulse. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+     // Toggle profile dropdown
+     function toggleProfileDropdown() {
+      const dropdown = document.getElementById('profileDropdown');
+      dropdown.classList.toggle('active');
+    }
+    // Header scroll effect
+    window.addEventListener('scroll', function() {
+      const header = document.getElementById('header');
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+    
+    // Scroll to section
+    function scrollToSection(sectionId) {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.scrollIntoView({behavior: 'smooth'});
+      }
+    }
+    
+    // Animate elements on scroll
+    document.addEventListener('DOMContentLoaded', function() {
+      const animatedElements = document.querySelectorAll('.animate-in');
+      
+      function checkVisibility() {
+        const windowHeight = window.innerHeight;
+        
+        animatedElements.forEach(element => {
+          const elementPosition = element.getBoundingClientRect().top;
+          const offset = 150;
+          
+          if (elementPosition < windowHeight - offset) {
+            element.classList.add('visible');
+          }
+        });
+      }
+      
+      window.addEventListener('scroll', checkVisibility);
+      checkVisibility(); // Check on page load
+    });
+  </script>
+</body>
+</html>
