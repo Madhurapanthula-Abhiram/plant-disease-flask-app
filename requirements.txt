@@ -4,3 +4,5 @@ tensorflow
 Pillow
 Werkzeug
 numpy
+gunicorn
+boto3
