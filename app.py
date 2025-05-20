@@ -22,7 +22,7 @@ app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 # MongoDB setup
-client = MongoClient('mongodb://localhost:27017/')
+client = MongoClient('mongodb+srv://madhurapantulaabhi5:ArrX41A4230798160@@cluster0.ysos8jj.mongodb.net/')
 db = client['users']
 
 # Define collections
